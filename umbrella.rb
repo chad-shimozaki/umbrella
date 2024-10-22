@@ -46,7 +46,32 @@ current = parsed_weather_response.fetch("currently")
 temp = current.fetch("temperature")
 puts "It is currently #{temp}°F."
 
-#next hour weather
+#pulling hourly weather data and setting new variables
 hourly = parsed_weather_response.fetch("hourly")
-next_hour = hourly.fetch("summary")
-puts "Next Hour Conditions: #{next_hour}"
+hourly_data = hourly.fetch("data")
+
+next_twelve_hours = hourly_data[1..12]
+precip_prob_threshold = 0.10
+any_precipitation = false
+
+next_twelve_hours.each do |hourly|
+  precip_prob = hourly.fetch("precipProbability")
+
+  if precip_prob > precip_prob_threshold
+    any_precipitation = true
+
+    precip_time = Time.at(hour_hash.fetch("time"))
+
+    seconds_from_now = precip_time - Time.now
+
+    hours_from_now = seconds_from_now / 60 / 60
+
+    puts "In #{hours_from_now.round} hours, there is a #{(precip_prob * 100).round}% chance of precipitation."
+  end
+end
+
+if any_precipitation == true
+  puts "You might want to take an umbrella!"
+else
+  puts "You probably won't need an umbrella."
+end
